@@ -2,9 +2,11 @@ def ans(s):
     c = -1
     j = -1
     ans = []
-    s2 = sorted(s, key = lambda x: x[0])
-    key2 = sorted(range(len(s)), key = lambda x: s[x][0])
-    for i in range(len(s2)):
+    length = len(s)
+    sort_values = [[x[0], x[1], x[0] * 1440 + x[1] + i / 1500.0, i] for i, x in enumerate(s)]
+    s2 = sorted(sort_values, key = lambda x: x[2])
+    key2 = sorted(range(length), key = lambda x: s2[x][3])
+    for i in range(length):
         if s2[i][0] >= c:
             ans.append("C")
             c = s2[i][1]
@@ -13,7 +15,7 @@ def ans(s):
             j = s2[i][1]
         else:
             return "IMPOSSIBLE"
-    return "".join(list(map(lambda x: ans[key2[x]], range(len(s)))))
+    return "".join(list(map(lambda x: ans[key2[x]], range(length))))
 
 
 t = int(input())
