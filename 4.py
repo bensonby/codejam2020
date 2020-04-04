@@ -1,54 +1,93 @@
 import sys
+# use print to sys.stderr for debug, e.g.
+# print(values[current], file=sys.stderr)
 
 def solve(b):
-    values = []
-    values.append([-1] * b)
+    values = [-1] * b
+    current = 0
+    verifyIndex = [0, -1]
+    verifyValues = [-1, -1]
+    to_verify = False
 
-    # print(n, file=sys.stderr)
-    for _ in range(15):
+    for r in range(15):
         for i in range(10):
-            current = 1
-            print(current)
-            sys.stdout.flush()
-            v = int(input())
-        if prefs[0] == -1:
-            sys.exit()
-        d = prefs.pop(0)
-        # print("--1", file=sys.stderr)
-        if d == 0:
-            print('-1')
-            sys.stdout.flush()
-            continue
-        # print("--2", file=sys.stderr)
-        for flavor in prefs:
-            counts[flavor] = counts[flavor] + 1
+            paired = b - current - 1
+            if to_verify and (i == 0 or i == 1):
+                print(verifyIndex[i] + 1)
+                sys.stdout.flush()
+                verifyValues[i] = int(input())
 
-        # print("--3", file=sys.stderr)
-        relevant_counts = [counts[flavor] for flavor in prefs]
-        min_flavor_id = 0
-        for i in range(1, d):
-            if relevant_counts[i] < relevant_counts[min_flavor_id]:
-                min_flavor_id = i
-        # print("--4", file=sys.stderr)
-        min_flavor = prefs[min_flavor_id]
-        if counts[min_flavor] > 10000:
-            print('-1')
-            sys.stdout.flush()
-            continue
-        # print("--5", file=sys.stderr)
-        # sell flavor id min_flavor
-        counts[min_flavor] = 10001
-        print(min_flavor)
-        sys.stdout.flush()
+                if verifyIndex[1] == -1: # i.e i = 0
+                    # only have one value to verify
+                    to_verify = False
+                    if values[verifyIndex[0]] != verifyValues[0]: # otherwise treat as same
+                        # assume flip because it's always correct
+                        for j in range(0, b):
+                            values[j] = 1 - values[j]
+                        if paired < current:
+                            current = paired
+                elif i == 1:
+                    to_verify= False
+                    # verify two values
+                    # verifyIndex[0] and verifyIndex[1]
+                    # 0,0 => 0 and 0,1 => 0: same
+                    # 0,0 => 0 and 0,1 => 1: reverse
+                    # 1,1 => 0 and 0,1 => 0: reverse flipped
+                    # 1,1 => 0 and 0,1 => 1: flipped
+                    # 0,0 => 0 and 1,0 => 0: reverse
+                    # 0,0 => 0 and 1,0 => 1: same
+                    # 1,1 => 0 and 1,0 => 0: flipped
+                    # 1,1 => 0 and 1,0 => 1: reverse flipped
+                    if verifyValues[0] == values[verifyIndex[0]] and verifyValues[1] == values[verifyIndex[1]]:
+                        # same
+                        pass
+                    elif verifyValues[0] != values[verifyIndex[0]] and verifyValues[1] != values[verifyIndex[1]]:
+                        #flipped
+                        for j in range(0, b):
+                            values[j] = 1 - values[j]
+                    elif verifyValues[0] == values[verifyIndex[0]] and verifyValues[1] != values[verifyIndex[1]]:
+                        # reverse
+                        values.reverse()
+                    elif verifyValues[0] != values[verifyIndex[0]] and verifyValues[1] == values[verifyIndex[1]]:
+                        # reverse flipped
+                        values.reverse()
+                        for j in range(0, b):
+                            values[j] = 1 - values[j]
+                    if paired < current:
+                        current = paired
+            else:
+                print(current + 1)
+                sys.stdout.flush()
+                values[current] = int(input())
+
+                if current >= int(b / 2) and verifyIndex[1] == -1 and current != b - 1:
+                    # check if can use as second verifying
+                    if (values[0] + values[b - 1] + values[paired] + values[current]) % 2 == 1:
+                        # use 0 as same pair; 1 as different pair
+                        if values[0] != values[b - 1]:
+                            verifyIndex[1] = verifyIndex[0]
+                            verifyIndex[0] = paired
+                        else:
+                            verifyIndex[1] = paired # or current
+
+                new_current =  b - current - 1
+                if paired < current:
+                    if paired + 1 >= current:
+                        # finished
+                        print("".join([str(x) for x in values]))
+                        response = input()
+                        if response == "N":
+                            sys.exit()
+                        return
+                    current = paired + 1
+                else:
+                    current = paired
+                # assign verify if alright
+            if i == 9:
+                to_verify = True
 
 
-t = int(input())
-b = int(input())
-# print(t, file=sys.stderr)
+t = [t, b] = [int(x) for x in input().split(" ")]
 for _ in range(t):
-    # print("--------------", file=sys.stderr)
-    # n = int(input())
-    # result = solve(n)
     solve(b)
-    # if result == -1:
 sys.exit()
