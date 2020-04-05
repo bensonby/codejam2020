@@ -13,21 +13,22 @@ def solve(b):
         for i in range(10):
             paired = b - current - 1
             if to_verify and (i == 0 or i == 1):
-                print(verifyIndex[i] + 1)
+                if verifyIndex[i] == -1:
+                    print("1")
+                else:
+                    print(verifyIndex[i] + 1)
                 sys.stdout.flush()
                 verifyValues[i] = int(input())
 
-                if verifyIndex[1] == -1: # i.e i = 0
-                    # only have one value to verify
-                    to_verify = False
-                    if values[verifyIndex[0]] != verifyValues[0]: # otherwise treat as same
-                        # assume flip because it's always correct
-                        for j in range(0, b):
-                            values[j] = 1 - values[j]
-                        if paired < current:
-                            current = paired
-                elif i == 1:
+                if i == 1:
                     to_verify= False
+                    # verify one value
+                    if verifyIndex[1] == -1: # i.e i = 0
+                        if values[verifyIndex[0]] != verifyValues[0]: # otherwise treat as same
+                            # assume flip because it's always correct
+                            for j in range(0, b):
+                                values[j] = 1 - values[j]
+                        continue
                     # verify two values
                     # verifyIndex[0] and verifyIndex[1]
                     # 0,0 => 0 and 0,1 => 0: same
@@ -53,8 +54,6 @@ def solve(b):
                         values.reverse()
                         for j in range(0, b):
                             values[j] = 1 - values[j]
-                    if paired < current:
-                        current = paired
             else:
                 print(current + 1)
                 sys.stdout.flush()
@@ -70,7 +69,6 @@ def solve(b):
                         else:
                             verifyIndex[1] = paired # or current
 
-                new_current =  b - current - 1
                 if paired < current:
                     if paired + 1 >= current:
                         # finished
@@ -82,7 +80,7 @@ def solve(b):
                     current = paired + 1
                 else:
                     current = paired
-                # assign verify if alright
+
             if i == 9:
                 to_verify = True
 
